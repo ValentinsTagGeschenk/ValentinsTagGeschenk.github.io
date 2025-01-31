@@ -90,10 +90,16 @@
         .card.flipped img {
             visibility: visible;
         }
+        #timer {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #f1c40f;
+        }
     </style>
 </head>
 <body>
     <h1>Memory Spiel</h1>
+    <div id="timer">Zeit: 0 Sekunden</div>
     <div id="controls">
         <label for="pairs">Anzahl der Paare:</label>
         <input type="number" id="pairs" min="2" max="36" value="2">
@@ -102,20 +108,25 @@
     <div id="game-board"></div>
 
     <script>
+        let startTime, timerInterval;
+
         function startGame() {
+            clearInterval(timerInterval);
+            document.getElementById("timer").textContent = "Zeit: 0 Sekunden";
+            startTime = Date.now();
+            timerInterval = setInterval(updateTimer, 1000);
+
             const board = document.getElementById("game-board");
-            board.innerHTML = ""; // Board zurücksetzen
+            board.innerHTML = ""; 
             const pairs = parseInt(document.getElementById("pairs").value);
             let items = [];
             
-            // Array mit Bildpfaden aus dem "images"-Ordner
             for (let i = 1; i <= pairs; i++) {
-                items.push(`images/card${i}.png`, `images/card${i}.png`); // Doppelte Paare mit gleichen Bildern
+                items.push(`images/card${i}.png`, `images/card${i}.png`);
             }
-            items = items.sort(() => Math.random() - 0.5); // Zufällige Reihenfolge
+            items = items.sort(() => Math.random() - 0.5);
             
-            board.style.gridTemplateColumns = `repeat(${Math.ceil(Math.sqrt(pairs * 2))}, 110px)`; // Grid Layout
-
+            board.style.gridTemplateColumns = `repeat(${Math.ceil(Math.sqrt(pairs * 2))}, 110px)`;
             let flippedCards = [];
             let matchedPairs = 0;
             
@@ -123,14 +134,12 @@
                 const card = document.createElement("div");
                 card.classList.add("card");
                 card.dataset.value = imageSrc;
-
-                // Image-Tag für das Bild
+                
                 const img = document.createElement("img");
-                img.src = imageSrc; // Bildquelle aus dem "images"-Ordner
+                img.src = imageSrc;
                 img.alt = "Card image";
                 card.appendChild(img);
-
-                // Event Listener für das Umdrehen der Karte
+                
                 card.addEventListener("click", () => {
                     if (flippedCards.length < 2 && !card.classList.contains("flipped")) {
                         card.classList.add("flipped");
@@ -139,10 +148,15 @@
                         if (flippedCards.length === 2) {
                             setTimeout(() => {
                                 if (flippedCards[0].dataset.value === flippedCards[1].dataset.value) {
-                                    flippedCards.forEach(c => c.style.visibility = "hidden"); // Paare ausblenden
+                                    flippedCards.forEach(c => c.style.visibility = "hidden");
                                     matchedPairs++;
-                                    if (matchedPairs === pairs) {        
-                                        window.location.href = "gewonnen.html";
+                                    if (matchedPairs === pairs) {
+                                        clearInterval(timerInterval);
+                                        let totalTime = Math.floor((Date.now() - startTime) / 1000);
+                                        document.getElementById("timer").textContent = `Geschafft in ${totalTime} Sekunden!`;
+                                        setTimeout(() => {
+                                            window.location.href = "gewonnen.html";
+                                        }, 3000);
                                     }
                                 } else {
                                     flippedCards.forEach(c => {
@@ -154,10 +168,13 @@
                         }
                     }
                 });
-
-                // Karte zum Board hinzufügen
                 board.appendChild(card);
             });
+        }
+
+        function updateTimer() {
+            let elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+            document.getElementById("timer").textContent = `Zeit: ${elapsedTime} Sekunden`;
         }
     </script>
 </body>
