@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Spiel</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #1e1e1e;
+            color: #ffffff;
+        }
+        h1 {
+            margin-bottom: 20px;
+            color: #f1c40f;
+            font-size: 2rem;
+        }
+        #controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        #pairs {
+            padding: 5px;
+            font-size: 1rem;
+            border: 2px solid #f1c40f;
+            border-radius: 5px;
+            background-color: #333;
+            color: white;
+        }
+        button {
+            padding: 8px 15px;
+            font-size: 1rem;
+            background-color: #f39c12;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #e67e22;
+        }
+        #game-board {
+            display: grid;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .card {
+            width: 100px;
+            height: 100px;
+            background-color: #34495e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: transform 0.3s, background-color 0.3s;
+            position: relative;
+            box-shadow: 0 4px 6px rgba(255, 255, 255, 0.1);
+        }
+        .card:hover {
+            background-color: #2c3e50;
+        }
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+        .card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+            visibility: hidden;
+        }
+        .card.flipped img {
+            visibility: visible;
+        }
+    </style>
+</head>
+<body>
+    <h1>Memory Spiel</h1>
+    <div id="controls">
+        <label for="pairs">Anzahl der Paare:</label>
+        <input type="number" id="pairs" min="2" max="36" value="2">
+        <button onclick="startGame()">Starten</button>
+    </div>
+    <div id="game-board"></div>
+
+    <script>
+        function startGame() {
+            const board = document.getElementById("game-board");
+            board.innerHTML = ""; // Board zurücksetzen
+            const pairs = parseInt(document.getElementById("pairs").value);
+            let items = [];
+            
+            // Array mit Bildpfaden aus dem "images"-Ordner
+            for (let i = 1; i <= pairs; i++) {
+                items.push(`images/card${i}.png`, `images/card${i}.png`); // Doppelte Paare mit gleichen Bildern
+            }
+            items = items.sort(() => Math.random() - 0.5); // Zufällige Reihenfolge
+            
+            board.style.gridTemplateColumns = `repeat(${Math.ceil(Math.sqrt(pairs * 2))}, 110px)`; // Grid Layout
+
+            let flippedCards = [];
+            let matchedPairs = 0;
+            
+            items.forEach(imageSrc => {
+                const card = document.createElement("div");
+                card.classList.add("card");
+                card.dataset.value = imageSrc;
+
+                // Image-Tag für das Bild
+                const img = document.createElement("img");
+                img.src = imageSrc; // Bildquelle aus dem "images"-Ordner
+                img.alt = "Card image";
+                card.appendChild(img);
+
+                // Event Listener für das Umdrehen der Karte
+                card.addEventListener("click", () => {
+                    if (flippedCards.length < 2 && !card.classList.contains("flipped")) {
+                        card.classList.add("flipped");
+                        flippedCards.push(card);
+
+                        if (flippedCards.length === 2) {
+                            setTimeout(() => {
+                                if (flippedCards[0].dataset.value === flippedCards[1].dataset.value) {
+                                    flippedCards.forEach(c => c.style.visibility = "hidden"); // Paare ausblenden
+                                    matchedPairs++;
+                                    if (matchedPairs === pairs) {        
+                                        window.location.href = "gewonnen.html";
+                                    }
+                                } else {
+                                    flippedCards.forEach(c => {
+                                        c.classList.remove("flipped");
+                                    });
+                                }
+                                flippedCards = [];
+                            }, 1000);
+                        }
+                    }
+                });
+
+                // Karte zum Board hinzufügen
+                board.appendChild(card);
+            });
+        }
+    </script>
+</body>
+</html>
