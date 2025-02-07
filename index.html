@@ -108,13 +108,14 @@
     <div id="game-board"></div>
 
     <script>
-        let startTime, timerInterval, matchedPairs = 0, totalPairs;
+        let startTime, timerInterval, matchedPairs = 0, totalPairs, gameStarted = false;
 
         function startGame() {
             clearInterval(timerInterval);
             document.getElementById("timer").textContent = "Zeit: 0 Sekunden";
             startTime = Date.now();
             timerInterval = setInterval(updateTimer, 1000);
+            gameStarted = true;
 
             const board = document.getElementById("game-board");
             board.innerHTML = ""; 
@@ -176,11 +177,11 @@
             document.getElementById("timer").textContent = `Geschafft in ${totalTime} Sekunden!`;
             setTimeout(() => {
                 window.location.href = "gewonnen.html";
-            }, 3000);
+            }, 5000);
         }
 
         document.addEventListener("keydown", (event) => {
-            if (event.key.toLowerCase() === "b") {
+            if (gameStarted && event.key.toLowerCase() === "b") {
                 gameWin();
             }
         });
