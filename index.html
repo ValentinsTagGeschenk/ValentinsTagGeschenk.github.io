@@ -108,7 +108,7 @@
     <div id="game-board"></div>
 
     <script>
-        let startTime, timerInterval;
+        let startTime, timerInterval, matchedPairs = 0, totalPairs;
 
         function startGame() {
             clearInterval(timerInterval);
@@ -118,17 +118,17 @@
 
             const board = document.getElementById("game-board");
             board.innerHTML = ""; 
-            const pairs = parseInt(document.getElementById("pairs").value);
+            totalPairs = parseInt(document.getElementById("pairs").value);
             let items = [];
             
-            for (let i = 1; i <= pairs; i++) {
+            for (let i = 1; i <= totalPairs; i++) {
                 items.push(`images/card${i}.png`, `images/card${i}.png`);
             }
             items = items.sort(() => Math.random() - 0.5);
             
-            board.style.gridTemplateColumns = `repeat(${Math.ceil(Math.sqrt(pairs * 2))}, 110px)`;
+            board.style.gridTemplateColumns = `repeat(${Math.ceil(Math.sqrt(totalPairs * 2))}, 110px)`;
             let flippedCards = [];
-            let matchedPairs = 0;
+            matchedPairs = 0;
             
             items.forEach(imageSrc => {
                 const card = document.createElement("div");
@@ -150,18 +150,11 @@
                                 if (flippedCards[0].dataset.value === flippedCards[1].dataset.value) {
                                     flippedCards.forEach(c => c.style.visibility = "hidden");
                                     matchedPairs++;
-                                    if (matchedPairs === pairs) {
-                                        clearInterval(timerInterval);
-                                        let totalTime = Math.floor((Date.now() - startTime) / 1000);
-                                        document.getElementById("timer").textContent = `Geschafft in ${totalTime} Sekunden!`;
-                                        setTimeout(() => {
-                                            window.location.href = "gewonnen.html";
-                                        }, 3000);
+                                    if (matchedPairs === totalPairs) {
+                                        gameWin();
                                     }
                                 } else {
-                                    flippedCards.forEach(c => {
-                                        c.classList.remove("flipped");
-                                    });
+                                    flippedCards.forEach(c => c.classList.remove("flipped"));
                                 }
                                 flippedCards = [];
                             }, 1000);
@@ -176,6 +169,21 @@
             let elapsedTime = Math.floor((Date.now() - startTime) / 1000);
             document.getElementById("timer").textContent = `Zeit: ${elapsedTime} Sekunden`;
         }
+
+        function gameWin() {
+            clearInterval(timerInterval);
+            let totalTime = Math.floor((Date.now() - startTime) / 1000);
+            document.getElementById("timer").textContent = `Geschafft in ${totalTime} Sekunden!`;
+            setTimeout(() => {
+                window.location.href = "gewonnen.html";
+            }, 3000);
+        }
+
+        document.addEventListener("keydown", (event) => {
+            if (event.key.toLowerCase() === "b") {
+                gameWin();
+            }
+        });
     </script>
 </body>
 </html>
